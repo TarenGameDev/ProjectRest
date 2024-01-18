@@ -5,10 +5,6 @@ using UnityEngine;
 public class MarkerComponent : MonoBehaviour
 {
     FeedbackManager feedback;
-    //private void Start()
-    //{
-    //    feedback = FeedbackManager.instance;
-    //}
 
     PlayableCharacter _character;
     public PlayableCharacter character { get { return _character; } }
@@ -17,7 +13,7 @@ public class MarkerComponent : MonoBehaviour
     {
         _character = PC;
         feedback = FeedbackManager.instance;
-        feedback/*FeedbackManager.instance*/.onMarkerSpawn += CheckForExistingMarkers;
+        feedback.onMarkerSpawn += CheckForExistingMarkers;
         TryGetComponent(out _lineRenderer);
         _lineRenderer.SetPosition(1, transform.position);
     }
@@ -25,7 +21,7 @@ public class MarkerComponent : MonoBehaviour
     {
         if (character == _character && marker != this)
         {
-            feedback/*FeedbackManager.instance*/.DespawnMarker(this);
+            feedback.DespawnMarker(this);
         }
     }
 
@@ -43,6 +39,6 @@ public class MarkerComponent : MonoBehaviour
 
     private void OnDestroy()
     {
-        feedback/*FeedbackManager.instance*/.onMarkerSpawn -= CheckForExistingMarkers;
+        feedback.onMarkerSpawn -= CheckForExistingMarkers;
     }
 }

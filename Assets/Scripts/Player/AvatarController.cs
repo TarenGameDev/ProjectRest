@@ -43,9 +43,9 @@ public class AvatarController : MonoBehaviour
         _screenWidth = resolution.width;
         _screenHeight = resolution.height;
         _widthRangeMin = (_screenWidth / 100) * _panThreshold;
-        _widthRangeMax = (_screenWidth / 100) * 100 - _panThreshold;
+        _widthRangeMax = (_screenWidth / 100) * (100 - _panThreshold);
         _heightRangeMin = (_screenHeight / 100) * _panThreshold;
-        _heightRangeMax = (_screenHeight / 100) * 100 - _panThreshold;
+        _heightRangeMax = (_screenHeight / 100) * (100 - _panThreshold);
 
         //Set focus character
         if (focusCharacter == null && _partyCharacters[0] != null)
