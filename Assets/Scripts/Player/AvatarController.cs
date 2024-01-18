@@ -77,6 +77,8 @@ public class AvatarController : MonoBehaviour
         {
             focusCharacter.TryGetComponent(out CharacterMovement move);
             move?.MoveTo(hit.point);
+
+            FeedbackManager.instance.CreateMarkerOnClick(focusCharacter, hit.point);
         }
 
         
