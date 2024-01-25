@@ -13,7 +13,8 @@ public class AvatarController : MonoBehaviour
     [SerializeField] float _panSpeed = 5f;
     float _currentPanSpeed = 1f;
     [SerializeField][Range(0,100)][Tooltip("The percentage of the screen from the edge before starting to pan. Default = 10")] int _panThreshold = 10;
-    [SerializeField] Vector3 _camPosOffset;
+    Vector3 _camPosOffset = new(1,1,-1);
+    [SerializeField][Range(3f, 25f)] float cameraDistance = 10f;
     [SerializeField] Vector3 _camRot;
     public bool _freeCam;
     private int _screenHeight, _screenWidth;
@@ -50,6 +51,7 @@ public class AvatarController : MonoBehaviour
         //Set focus character
         if (focusCharacter == null && _partyCharacters[0] != null)
             focusCharacter = _partyCharacters[0];
+            
 
         //Set Up Input Controls
         GameManager.instance.TryGetComponent(out InputManager input);
@@ -95,6 +97,9 @@ public class AvatarController : MonoBehaviour
     {
         CheckForPan();
         CheckForFocus();
+
+        _mainCamera.transform.localPosition = cameraDistance * _camPosOffset;
+
     }
 
     void CheckForPan()
@@ -157,7 +162,7 @@ public class AvatarController : MonoBehaviour
         {
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2);
             float dist = (targetPos - transform.position).magnitude;
-            if (dist <= 0.5f) transform.position = targetPos;
+            if (dist <= 0.05f) transform.position = targetPos;
         }
     }
 
@@ -191,5 +196,8 @@ public class AvatarController : MonoBehaviour
         }
 
         focusCharacter = _partyCharacters[pos];
+        
     }
+
+    
 }
