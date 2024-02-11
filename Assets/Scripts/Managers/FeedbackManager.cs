@@ -20,12 +20,12 @@ public class FeedbackManager : MonoBehaviour
     }
 
     public Action<PlayableCharacter, MarkerComponent> onMarkerSpawn;
-    public void CreateMarkerOnClick(PlayableCharacter PC, Vector3 pos)
+    public void CreateMarkerOnClick(PlayableCharacter focusCharacter, Vector3 pos)
     {
         var createdMarker = Instantiate(_moveMarkerPrefab, pos, Quaternion.identity).GetComponent<MarkerComponent>();
 
-        createdMarker.Initialise(PC);
-        onMarkerSpawn?.Invoke(PC, createdMarker);
+        createdMarker.Initialise(focusCharacter);
+        onMarkerSpawn?.Invoke(focusCharacter, createdMarker);
     }
 
     public void DespawnMarker(MarkerComponent marker)

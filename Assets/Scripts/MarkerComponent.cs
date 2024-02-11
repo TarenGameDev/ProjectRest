@@ -17,9 +17,15 @@ public class MarkerComponent : MonoBehaviour
         TryGetComponent(out _lineRenderer);
         _lineRenderer.SetPosition(1, transform.position);
     }
-    void CheckForExistingMarkers(PlayableCharacter character, MarkerComponent marker)
+    void CheckForExistingMarkers(PlayableCharacter focusCharacter, MarkerComponent marker)
     {
-        if (character == _character && marker != this)
+        if (focusCharacter == _character && marker != this)
+        {
+            feedback.DespawnMarker(this);
+        }
+
+        //if we are not the focus character, despawn me
+        if(focusCharacter != _character)
         {
             feedback.DespawnMarker(this);
         }

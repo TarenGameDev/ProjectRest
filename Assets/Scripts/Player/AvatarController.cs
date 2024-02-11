@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.AI;
+using UnityEngine.TextCore.Text;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System;
 
 public class AvatarController : MonoBehaviour
 {
+    #region Variables
     public static AvatarController instance;
 
     [Header("Camera")]
@@ -20,11 +24,10 @@ public class AvatarController : MonoBehaviour
     private int _screenHeight, _screenWidth;
     private int _heightRangeMin, _heightRangeMax, _widthRangeMax, _widthRangeMin;
 
-    [Header("Party")]
-    [SerializeField] List<PlayableCharacter> _partyCharacters = new();
-    private PlayableCharacter m_focusCharacter;
-    public PlayableCharacter focusCharacter { get { return m_focusCharacter; } set { m_focusCharacter = value; } }
+    public Party party;
+    #endregion
 
+    #region Unity
     private void Awake()
     {
         //Set up Singleton
@@ -47,8 +50,8 @@ public class AvatarController : MonoBehaviour
         _heightRangeMax = (_screenHeight / 100) * (100 - _panThreshold);
 
         //Set focus character
-        if (focusCharacter == null && _partyCharacters[0] != null)
-            focusCharacter = _partyCharacters[0];
+        if (party.focus == null && party.Characters[0] != null)
+            party.ChangeFocusDefault();
             
 
         //Set Up Input Controls
@@ -56,8 +59,8 @@ public class AvatarController : MonoBehaviour
         input.OnChangeCamera += ChangeCameraMode;
         input.OnChangedCharacter += Input_OnChangedCharacter;
         input.OnL_Click += Input_OnLeftClick;
+        input.OnFollowModeChange += Input_OnFollowModeChange;
     }
-
     private void OnDestroy()
     {
         GameManager.instance.TryGetComponent(out InputManager input);
@@ -65,28 +68,6 @@ public class AvatarController : MonoBehaviour
         input.OnChangedCharacter -= Input_OnChangedCharacter;
         input.OnL_Click -= Input_OnLeftClick;
     }
-
-    private void Input_OnLeftClick(InputAction.CallbackContext obj)
-    {
-        if (!obj.performed) return;
-
-        var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
-            if(hit.collider.TryGetComponent(out IInteractable interact))
-                interact.Interact();
-            else
-                GroundClicked(hit.point);
-    }
-
-    void GroundClicked(Vector3 groundPoint)
-    {
-        focusCharacter.TryGetComponent(out CharacterMovement move);
-        move?.MoveTo(groundPoint);
-
-        FeedbackManager.instance.CreateMarkerOnClick(focusCharacter, groundPoint);
-    }
-
     private void Update()
     {
         ControlPanSpeed();
@@ -98,9 +79,78 @@ public class AvatarController : MonoBehaviour
         CheckForFocusCameraMode();
 
         _mainCamera.transform.localPosition = cameraDistance * _camPosOffset;
+    }
+    #endregion
 
+    #region Input Events
+    private void Input_OnFollowModeChange(InputAction.CallbackContext obj)
+    {
+        if (!obj.performed) return;
+
+        party.focus.TryGetComponent(out CharacterMovement move);
+
+        move?.ToggleFollowMode();
     }
 
+    private void Input_OnLeftClick(InputAction.CallbackContext obj)
+    {
+        if (!obj.performed) return;
+
+        var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+            if (hit.collider.TryGetComponent(out IInteractable interact))
+                interact.Interact();
+            else
+                GroundClicked(hit.point);
+    }
+
+    private void Input_OnChangedCharacter(InputAction.CallbackContext context, bool left)
+    {
+        if (party.Characters.Count <= 1)
+        {
+            Debug.Log("Not enough characters.");
+            return;
+        }
+
+        if (!context.performed) return;
+
+        List<PlayableCharacter> temp = new();
+        PlayableCharacter held;
+        if (left)
+        {
+            //first to end.
+            held = party.Characters[0];
+            for (int i = 1; i < party.Characters.Count; i++)
+                temp.Add(party.Characters[i]);
+            temp.Add(held);
+        }
+        else
+        {
+            //end to first.
+            held = party.Characters[party.Characters.Count - 1];
+            temp.Add(held);
+            for (int i = 0; i < party.Characters.Count - 1; i++)
+                temp.Add(party.Characters[i]);
+        }
+
+        party.Characters = temp;
+        party.ChangeFocusDefault();
+    }
+    #endregion
+
+    public event Action<CharacterMovement, Vector3> OnGroundClick;
+    void GroundClicked(Vector3 groundPoint)
+    {
+        if (!party.focus.TryGetComponent(out CharacterMovement move)) return;
+
+        //move.MoveTo(groundPoint);
+        OnGroundClick?.Invoke(move, groundPoint);
+
+        FeedbackManager.instance.CreateMarkerOnClick(party.focus, groundPoint);
+    }
+
+    #region Camera
     void CheckForPanCameraMode()
     {
         if (!_freeCam) return;
@@ -152,12 +202,12 @@ public class AvatarController : MonoBehaviour
 
     void CheckForFocusCameraMode()
     {
-        if (focusCharacter == null || _freeCam) return;
+        if (party.focus == null || _freeCam) return;
 
         //lerp to position
-        Vector3 targetPos = new(focusCharacter.transform.position.x, 0, focusCharacter.transform.position.z);
+        Vector3 targetPos = new(party.focus.transform.position.x, 0, party.focus.transform.position.z);
         _rampPanSpeed = transform.position != targetPos;
-        if (transform.position != focusCharacter.transform.position)
+        if (transform.position != party.focus.transform.position)
         {
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2);
             float dist = (targetPos - transform.position).magnitude;
@@ -170,43 +220,21 @@ public class AvatarController : MonoBehaviour
         if (!context.performed) return;
         _freeCam = !_freeCam;
     }
-    private void Input_OnChangedCharacter(InputAction.CallbackContext context, bool left)
+    #endregion
+}
+
+[System.Serializable]
+public struct Party
+{
+    public List<PlayableCharacter> Characters;
+    public PlayableCharacter focus { get { return _focus; } }
+    PlayableCharacter _focus;
+
+    public void ChangeFocus(PlayableCharacter character)
     {
-        if (_partyCharacters.Count <= 1)
-        {
-            Debug.Log("Not enough characters.");
-            return;
-        }
-
-        if (!context.performed) return;
-
-
-        /// Currently(bad): picks the character next in the list and assigns it as the focus 
-        /// Needed(good): cycle each entry up or down 1 position on the list, then assign [0] as focus 
-        Debug.LogWarning("This needs to be changed!");
-
-        WrongVersion();
-        void WrongVersion()
-        {
-            int pos = _partyCharacters.IndexOf(focusCharacter);
-            if (left)
-            {
-                pos -= 1;
-                if (pos < 0)
-                    pos = _partyCharacters.Count - 1;
-            }
-            else
-            {
-                pos += 1;
-                if (pos == _partyCharacters.Count)
-                    pos = 0;
-            }
-
-            focusCharacter = _partyCharacters[pos];
-        }
-        
-        
+        _focus = character;
     }
 
-    
+    public void ChangeFocusDefault() => ChangeFocus(Characters[0]);
+
 }

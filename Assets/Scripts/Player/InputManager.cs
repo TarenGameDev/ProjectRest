@@ -20,4 +20,7 @@ public class InputManager : MonoBehaviour
     public event Action<InputAction.CallbackContext> OnL_Click;
     public void LeftClick(InputAction.CallbackContext context) => OnL_Click?.Invoke(context);
 
+    public event Action<InputAction.CallbackContext> OnFollowModeChange;
+    public void ChangeFollowMode(InputAction.CallbackContext context) => OnFollowModeChange?.Invoke(context);
+
 }

@@ -372,11 +372,12 @@ MonoBehaviour:
   cameraDistance: 10
   _camRot: {x: 33, y: -45, z: 0}
   _freeCam: 0
-  _partyCharacters:
-  - {fileID: 2063055445}
-  - {fileID: 1033203576}
-  - {fileID: 2104006373}
-  - {fileID: 807979581}
+  party:
+    Characters:
+    - {fileID: 2063055445}
+    - {fileID: 1033203576}
+    - {fileID: 2104006373}
+    - {fileID: 807979581}
 --- !u!4 &649634533
 Transform:
   m_ObjectHideFlags: 0
@@ -507,6 +508,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: ce823f3b-7479-4645-8bea-6197d31aca0f
     m_ActionName: InGame/Click[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 649634535}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: ChangeFollowMode
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3464b581-cef5-4f90-9366-4d9bed2a389f
+    m_ActionName: InGame/FollowMode[/Keyboard/f]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard
   m_DefaultActionMap: InGame
@@ -977,9 +994,12 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Click to Move
 
-    F - Swap Camera Mode
+    F - Swap Follower Mode
 
-    Z/C - Swap Characters'
+    Home - Swap Camera Mode
+
+    Z/C
+    - Swap Characters'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1348,6 +1368,10 @@ PrefabInstance:
     - target: {fileID: 7759682850804751514, guid: 8fa58d37b4168de4f8423693d7d7b9e4, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8610518174974792552, guid: 8fa58d37b4168de4f8423693d7d7b9e4, type: 3}
+      propertyPath: threshold
+      value: 3.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1888,6 +1912,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8610518174974792552, guid: 8fa58d37b4168de4f8423693d7d7b9e4, type: 3}
+      propertyPath: threshold
+      value: 3.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2289,6 +2317,10 @@ PrefabInstance:
     - target: {fileID: 7759682850804751514, guid: 8fa58d37b4168de4f8423693d7d7b9e4, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8610518174974792552, guid: 8fa58d37b4168de4f8423693d7d7b9e4, type: 3}
+      propertyPath: threshold
+      value: 3.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

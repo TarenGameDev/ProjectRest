@@ -40,13 +40,22 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "FollowMode",
+                    "type": "Button",
+                    "id": "3464b581-cef5-4f90-9366-4d9bed2a389f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "",
                     "id": "751aa06d-0679-497d-acf9-f9bb8a995498",
-                    "path": "<Keyboard>/f",
+                    "path": "<Keyboard>/home",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
@@ -84,6 +93,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "L_Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "996f614e-50fc-480b-91fb-a2012b9fdc2b",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FollowMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
