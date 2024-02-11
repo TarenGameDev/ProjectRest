@@ -17,7 +17,7 @@ public class InputManager : MonoBehaviour
     public void ChangeCharacterLeft(InputAction.CallbackContext context) => OnChangedCharacter?.Invoke(context, true);
     public void ChangeCharacterRight(InputAction.CallbackContext context) => OnChangedCharacter?.Invoke(context, false);
 
-    public event Action<InputAction.CallbackContext> OnClick;
-    public void Click(InputAction.CallbackContext context) => OnClick?.Invoke(context);
+    public event Action<InputAction.CallbackContext> OnL_Click;
+    public void LeftClick(InputAction.CallbackContext context) => OnL_Click?.Invoke(context);
 
 }

@@ -21,7 +21,6 @@ public class CharacterMovement : MonoBehaviour
     {
         _targetDestination = destination;
         _agent.SetDestination(_targetDestination);
-        
     }
 
     private void Update()

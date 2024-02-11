@@ -25,8 +25,6 @@ public class AvatarController : MonoBehaviour
     private PlayableCharacter m_focusCharacter;
     public PlayableCharacter focusCharacter { get { return m_focusCharacter; } set { m_focusCharacter = value; } }
 
-
-
     private void Awake()
     {
         //Set up Singleton
@@ -57,7 +55,7 @@ public class AvatarController : MonoBehaviour
         GameManager.instance.TryGetComponent(out InputManager input);
         input.OnChangeCamera += ChangeCameraMode;
         input.OnChangedCharacter += Input_OnChangedCharacter;
-        input.OnClick += Input_OnClick;
+        input.OnL_Click += Input_OnLeftClick;
     }
 
     private void OnDestroy()
@@ -65,44 +63,45 @@ public class AvatarController : MonoBehaviour
         GameManager.instance.TryGetComponent(out InputManager input);
         input.OnChangeCamera -= ChangeCameraMode;
         input.OnChangedCharacter -= Input_OnChangedCharacter;
-        input.OnClick -= Input_OnClick;
+        input.OnL_Click -= Input_OnLeftClick;
     }
 
-    private void Input_OnClick(InputAction.CallbackContext obj)
+    private void Input_OnLeftClick(InputAction.CallbackContext obj)
     {
         if (!obj.performed) return;
 
         var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+            if(hit.collider.TryGetComponent(out IInteractable interact))
+                interact.Interact();
+            else
+                GroundClicked(hit.point);
+    }
 
-        if(Physics.Raycast(ray, out hit))
-        {
-            focusCharacter.TryGetComponent(out CharacterMovement move);
-            move?.MoveTo(hit.point);
+    void GroundClicked(Vector3 groundPoint)
+    {
+        focusCharacter.TryGetComponent(out CharacterMovement move);
+        move?.MoveTo(groundPoint);
 
-            FeedbackManager.instance.CreateMarkerOnClick(focusCharacter, hit.point);
-        }
-
-        
+        FeedbackManager.instance.CreateMarkerOnClick(focusCharacter, groundPoint);
     }
 
     private void Update()
     {
         ControlPanSpeed();
-
-        
     }
 
     private void FixedUpdate()
     {
-        CheckForPan();
-        CheckForFocus();
+        CheckForPanCameraMode();
+        CheckForFocusCameraMode();
 
         _mainCamera.transform.localPosition = cameraDistance * _camPosOffset;
 
     }
 
-    void CheckForPan()
+    void CheckForPanCameraMode()
     {
         if (!_freeCam) return;
 
@@ -151,7 +150,7 @@ public class AvatarController : MonoBehaviour
         _currentPanSpeed = Mathf.Lerp(_currentPanSpeed, _panSpeed, Time.deltaTime);
     }
 
-    void CheckForFocus()
+    void CheckForFocusCameraMode()
     {
         if (focusCharacter == null || _freeCam) return;
 
@@ -181,21 +180,31 @@ public class AvatarController : MonoBehaviour
 
         if (!context.performed) return;
 
-        int pos = _partyCharacters.IndexOf(focusCharacter);
-        if (left)
-        {
-            pos -= 1;
-            if (pos < 0)
-                pos = _partyCharacters.Count - 1;
-        }
-        else
-        {
-            pos += 1;
-            if (pos == _partyCharacters.Count)
-                pos = 0;
-        }
 
-        focusCharacter = _partyCharacters[pos];
+        /// Currently(bad): picks the character next in the list and assigns it as the focus 
+        /// Needed(good): cycle each entry up or down 1 position on the list, then assign [0] as focus 
+        Debug.LogWarning("This needs to be changed!");
+
+        WrongVersion();
+        void WrongVersion()
+        {
+            int pos = _partyCharacters.IndexOf(focusCharacter);
+            if (left)
+            {
+                pos -= 1;
+                if (pos < 0)
+                    pos = _partyCharacters.Count - 1;
+            }
+            else
+            {
+                pos += 1;
+                if (pos == _partyCharacters.Count)
+                    pos = 0;
+            }
+
+            focusCharacter = _partyCharacters[pos];
+        }
+        
         
     }
 
