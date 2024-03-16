@@ -102,7 +102,16 @@ public class AvatarController : MonoBehaviour
             if (hit.collider.TryGetComponent(out IInteractable interact))
                 interact.Interact();
             else
-                MoveOnGroundTo(hit.point);
+            {
+                //NEW
+                if (hit.collider.gameObject.layer != 3) return;
+
+                Debug.Log("hit walker");
+                var path = FindObjectOfType<Pathfinder>();
+                path.GeneratePath(party.focus.transform.position, hit.point);
+            }
+                //TESTING
+                //MoveOnGroundTo(hit.point);
     }
 
     private void Input_OnChangedCharacter(InputAction.CallbackContext context, bool left)
@@ -158,29 +167,13 @@ public class AvatarController : MonoBehaviour
         var mousePos = Input.mousePosition;
         Vector3 camPos = new Vector3();
 
-        if (mousePos.x <= _widthRangeMin)
-        {
-            camPos.x += -1;
-            camPos.z += -1;
-        }
+        if (mousePos.x <= _widthRangeMin) camPos += GameManager.cardinalLeft;
             
-        if (mousePos.x >= _widthRangeMax)
-        {
-            camPos.x += +1;
-            camPos.z += +1;
-        }
+        if (mousePos.x >= _widthRangeMax) camPos += GameManager.cardinalRight;
             
-        if (mousePos.y <= _heightRangeMin)
-        {
-            camPos.z += -1;
-            camPos.x += +1;
-        }
-            
-        if (mousePos.y >= _heightRangeMax)
-        {
-            camPos.z += 1;
-            camPos.x += -1;
-        }
+        if (mousePos.y <= _heightRangeMin) camPos += GameManager.cardinalDown;
+
+        if (mousePos.y >= _heightRangeMax) camPos += GameManager.cardinalUp;
 
         _rampPanSpeed = camPos != Vector3.zero;
 
