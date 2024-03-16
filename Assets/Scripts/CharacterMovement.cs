@@ -15,7 +15,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] AnimationControllerList _animatorControllerList;
     Animator _animator;
 
-    PlayableCharacter _character;
+    PlayableCharacter _playableCharacter;
     AvatarController _avatar;
     InputManager _input;
     List<PlayableCharacter> _currentLineUp = new(); 
@@ -31,7 +31,7 @@ public class CharacterMovement : MonoBehaviour
         GameManager.instance.TryGetComponent(out _input);
         
 
-        if(TryGetComponent(out _character))
+        if(TryGetComponent(out _playableCharacter))
         {
             _avatar.OnGroundClick += PlayableMoveTo;
             _input.OnChangedCharacter += OnCharacterChange;
@@ -40,7 +40,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (TryGetComponent(out _character))
+        if (TryGetComponent(out _playableCharacter))
         {
             _avatar.OnGroundClick -= PlayableMoveTo;
             _input.OnChangedCharacter -= OnCharacterChange;
@@ -57,9 +57,9 @@ public class CharacterMovement : MonoBehaviour
     {
         _targetDestination = position;
 
-        if (_character != null)
+        if (_playableCharacter != null)
         {
-            bool focused = _avatar.party.focus == _character;
+            bool focused = _avatar.party.focus == _playableCharacter;
             _currentLineUp = _avatar.party.Characters;
 
             //if were focused, go there!
@@ -67,7 +67,7 @@ public class CharacterMovement : MonoBehaviour
                 _agent.SetDestination(_targetDestination);
 
             //if were not focused, but in follow mode AND the leader is in follow mode also.
-            if (!focused && _character.followMode && movement._character.followMode)
+            if (!focused && _playableCharacter.followMode && movement._playableCharacter.followMode)
                 FollowLeaderAsync();
 
             //if were not focused AND not in follow mode (do nothing)
@@ -77,7 +77,7 @@ public class CharacterMovement : MonoBehaviour
     async void FollowLeaderAsync()
     {
         //find the character in the party infront of you.
-        int i = _currentLineUp.IndexOf(_character);
+        int i = _currentLineUp.IndexOf(_playableCharacter);
         if (i <= 0)
             i = _currentLineUp.Count;
         var next = _currentLineUp[i - 1];
@@ -87,13 +87,13 @@ public class CharacterMovement : MonoBehaviour
 
         //Follow the character in the party infront of you.
         float distanceToNext = (next.transform.position - transform.position).magnitude;
-        if(distanceToNext > _character.threshold)
+        if(distanceToNext > _playableCharacter.threshold)
             _agent.SetDestination(next.transform.position);
 
         //Delay
         await Task.Delay(400);
         if (!Application.isPlaying) return;
-        bool focused = _avatar.party.focus == _character;
+        bool focused = _avatar.party.focus == _playableCharacter;
 
         //if we've switched to this character mid walk, continue to destination unhindered
         if (focused)
@@ -102,7 +102,7 @@ public class CharacterMovement : MonoBehaviour
         float distanceToEnd = (_targetDestination - transform.position).magnitude;
         //If we're still too far away from destination, keep following your leader.
         //if we've switched to this character mid walk, we need to break the cycle.
-        if(distanceToEnd > _character.threshold && !focused)
+        if(distanceToEnd > _playableCharacter.threshold && !focused)
         {
             //Loop.
             FollowLeaderAsync();
@@ -110,8 +110,8 @@ public class CharacterMovement : MonoBehaviour
         else if(!focused)
         {
             //When close enough to destination, just step to the side.
-            int rand1 = (int)Random.Range(-_character.threshold, _character.threshold);
-            int rand2 = (int)Random.Range(-_character.threshold, _character.threshold);
+            int rand1 = (int)Random.Range(-_playableCharacter.threshold, _playableCharacter.threshold);
+            int rand2 = (int)Random.Range(-_playableCharacter.threshold, _playableCharacter.threshold);
             Vector3 pos = new(rand1, 0, rand2);
             pos += transform.position;
             _agent.SetDestination(pos);
@@ -126,18 +126,18 @@ public class CharacterMovement : MonoBehaviour
 
     public void ToggleFollowMode()
     {
-        _character.followMode = !_character.followMode;
+        _playableCharacter.followMode = !_playableCharacter.followMode;
 
         //If we are turning follow mode back, make the other party members walk up to the focus character
-        if(_character.followMode)
+        if(_playableCharacter.followMode)
             foreach(var character in _currentLineUp)
-                if(character != _character)
+                if(character != _playableCharacter)
                 {
                     character.TryGetComponent(out CharacterMovement move);
                     move?.PlayableMoveTo(this, transform.position);
                 }
   
-        Debug.Log("Follow Mode has been toggled to " + _character.followMode);
+        Debug.Log("Follow Mode has been toggled to " + _playableCharacter.followMode);
         Debug.LogWarning("Put Feedback Here");
     }
 

@@ -102,7 +102,7 @@ public class AvatarController : MonoBehaviour
             if (hit.collider.TryGetComponent(out IInteractable interact))
                 interact.Interact();
             else
-                GroundClicked(hit.point);
+                MoveOnGroundTo(hit.point);
     }
 
     private void Input_OnChangedCharacter(InputAction.CallbackContext context, bool left)
@@ -140,7 +140,7 @@ public class AvatarController : MonoBehaviour
     #endregion
 
     public event Action<CharacterMovement, Vector3> OnGroundClick;
-    void GroundClicked(Vector3 groundPoint)
+    void MoveOnGroundTo(Vector3 groundPoint)
     {
         if (!party.focus.TryGetComponent(out CharacterMovement move)) return;
 
